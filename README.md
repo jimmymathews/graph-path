@@ -4,13 +4,10 @@
 graph-path (gp)
 ===============
 
-  1. **[Installation](#Installation)**
-  2. **[Usage](#Usage)**
-
 Installation <a name="Installation"></a>
 ------------
 
-Currently supported only on Linux/Mac/Unix. Requires Python.
+Currently supports only Linux/Mac/Unix. Requires Python.
 
 ```
 ./install.sh
