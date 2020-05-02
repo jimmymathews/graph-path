@@ -7,13 +7,14 @@ graph-path (gp)
 Installation <a name="Installation"></a>
 ------------
 
-Currently supports only Linux/Mac/Unix. Requires Python.
+Currently supported only on bash in Linux/Mac/Unix environments. Requires Python.
 
 ```
 ./install.sh
+exec bash
 ```
 
-Command-line options documentation: `man gp` or `man graph-path`.
+The `exec bash` line reloads the shell so that `gp` and `man gp` are available right away without starting a new shell.
 
 Usage <a name="Usage"></a>
 -----
