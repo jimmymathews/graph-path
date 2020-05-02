@@ -9,13 +9,15 @@ Installation <a name="Installation"></a>
 
 Currently supported only in Linux/Mac/Unix environments. Does not require root privileges.
 
-The install script requires `bash`:
+Install the dependencies then run the bash install script:
 ```
+pip install igraph
+pip install pygtrie
 ./install.sh
 exec bash
 ```
 
-The `exec bash` line reloads the shell so that `gp` and `man gp` are available right away without starting a new shell. The program itself only requires Python.
+The `exec bash` line reloads the shell so that `gp` and `man gp` are available right away without starting a new shell. The program itself is written in Python.
 
 Uninstallation:
 ```
