@@ -1,0 +1,77 @@
+.\" Manpage for gp (graph-path).
+.\" Contact jimmy@jmath.read-books.org to correct errors or typos.
+.TH man 1 "1 May 2020" "0.1" "gp man page"
+
+.SH NAME
+.B gp
+\- graph path viewer
+
+.SH SYNOPSIS
+.B gp
+[
+.I graph_file
+] [
+.B -d
+.I descriptions_file
+] [
+.B -n
+.I name_aliases_file
+] [
+.B -v --vertical
+] [
+.B -c --case
+] [
+.B -s --stats
+]
+
+.SH DESCRIPTION
+.B gp 
+(
+.B graph-path
+) peeks at a graph structure at the command line without firing up any high-powered tools. You can do node search, find shortest paths, and see basic statistics with a few keystrokes in an uncluttered display. The preferred 
+.I graph_file
+format is
+.B graphml
+with a "name" attribute. Edge list format is also acceptable, using space-separated integer pairs. Formats automatically detected by the
+.B igraph
+library may also work.
+
+.SH OPTION
+.TP
+.B -n --names
+.I name_aliases_file
+(optional) comma or tab separated values with 2 columns: node name as it appears in
+.I graph_file
+, and a preferred alias. This is useful if the node names in the topology file are not the preferred names.
+.TP
+.B -d --descriptions
+.I descriptions_file
+(optional) comma or tab separated values with 2 columns: node name (or alias), and longer description.
+.TP
+.B -v --vertical
+(optional) if set, lists nodes vertically (this is easier for copy and paste).
+.TP
+.B -c --case
+(optional) if set, character input is case-insensitive (convenient if node names are capitalized).
+.TP
+.B -s --stats
+(optional) show statistics.
+
+.SH EXAMPLES
+gp -s topology.graphml
+
+gp topology.txt -n node_ids_to_names.txt -d node_ids_to_descriptions.txt 
+.SH USAGE
+After typing a node name and a second node name, a shortest path between these nodes is shown.
+.TP
+.I <tab-key>
+autocomplete node names
+.TP
+.I <backspace>
+shorten the currently shown path by one node, or delete character if editing a node query
+.TP
+.I <enter> (3 times)
+exit
+.SH AUTHOR
+Jimmy Mathews (jimmy@jmath.read-books.org)
+
