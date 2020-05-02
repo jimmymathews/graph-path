@@ -37,7 +37,9 @@ install_man() {
     src=$1
     trg=$2
     cp $src ~/man/man1/$trg
-    rm ~/man/man1/"$trg".gz
+    if [ -f ~/man/man1/"$trg".gz ]; then
+        rm ~/man/man1/"$trg".gz
+    fi
     gzip ~/man/man1/$trg
 }
 
