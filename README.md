@@ -9,7 +9,7 @@ Installation <a name="Installation"></a>
 
 Currently supported only in Linux/Mac/Unix environments. Does not require root privileges.
 
-Install the dependencies then run the bash install script:
+Install the dependencies and run the bash install script:
 ```
 pip install igraph
 pip install pygtrie
