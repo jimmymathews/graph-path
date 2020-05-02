@@ -7,14 +7,20 @@ graph-path (gp)
 Installation <a name="Installation"></a>
 ------------
 
-Currently supported only on bash in Linux/Mac/Unix environments. Requires Python.
+Currently supported only in Linux/Mac/Unix environments. Does not require root privileges.
 
+The install script requires `bash`:
 ```
 ./install.sh
 exec bash
 ```
 
-The `exec bash` line reloads the shell so that `gp` and `man gp` are available right away without starting a new shell.
+The `exec bash` line reloads the shell so that `gp` and `man gp` are available right away without starting a new shell. The program itself only requires Python.
+
+Uninstallation:
+```
+./uninstall.sh
+```
 
 Usage <a name="Usage"></a>
 -----
