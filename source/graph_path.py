@@ -1,4 +1,3 @@
-#!/usr/bin/python
 
 version = '0.2'
 # Uses 'pygtrie' library, https://github.com/google/pygtrie (released under Apache License 2.0). May 3 2020
