@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 red="\u001b[0;31m"
 grn="\u001b[0;32m"

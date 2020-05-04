@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 red="\u001b[0;31m"
 grn="\u001b[0;32m"
@@ -8,9 +8,9 @@ res="\u001b[0m"
 
 ## Executable installation
 
-she="#!"
-bang=`echo -e "$(which python)\n"`
-echo "$she$bang" > gp
+# she="#!"
+# bang=`echo -e "$(which python)\n"`
+echo "#!/usr/bin/env python" > gp
 cat graph-path.py >> gp
 chmod +x gp
 if [[ ! -d ~/bin ]]; then

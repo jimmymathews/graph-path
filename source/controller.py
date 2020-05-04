@@ -1,33 +1,22 @@
-#!/usr/bin/python
 
-version = '0.2'
-# Uses 'pygtrie' library, https://github.com/google/pygtrie (released under Apache License 2.0). May 3 2020
-
-# Python standard library
-from enum import Enum
-
-# project-level
 from pygtrie import *  # third-party library
 from terminal_utilities import *
-from options_utilities import *
-from graph_computations import *
-from simple_utilities import *
+from model import GPModel
+from view import GPView
 
-class GUI:
-    def __init__(self, graph, vertical_layout, description_capable, case_insensitive):
-        self.reset_state()
-        self.graph = graph
-        self.case_insensitive = case_insensitive
-        case_manager = lambda x:x
-        if(self.case_insensitive):
-            case_manager = lambda x: x.upper()
-        node_names = sorted([case_manager(graph.vs[i]['name']) for i in range(len(graph.vs))])
-        self.trie = CharTrie()
-        for name in node_names:
-            self.trie[name] = True
-        self.vertical_layout = vertical_layout
-        self.description_capable = description_capable
-        self.tick=0
+def GPController:
+init
+
+handle_io
+        with CursorOff():
+            gc = GetChar()
+            while True:
+                c = gc.get_char()
+                self.controller.handle_char_input(c)
+                self.view.refresh()
+
+
+                self.controller.handle_char_input(c)
 
     def reset_state(self):
         self.nodes = ['']
@@ -36,41 +25,6 @@ class GUI:
         self.candidate = 0
         self.pushed = None
         self.neighbor = None
-
-    def display_abridged_cached(self):
-        print(self.cached)
-        if(self.vertical_layout):
-            print(CLEAR_LINE)
-            print(UP_LINE)
-
-    def display(self):
-        txt = (CLEAR_LINE + '\n')*self.lines + self.lines*UP_LINE
-        self.lines = 1
-        for i,n in enumerate(self.nodes):
-            if i == len(self.nodes)-1:
-                if(n != '' and self.completion != None):
-                    txt += BOLD_MAGENTA + n + RESET
-                    txt += MAGENTA + self.completion + RESET
-                txt += CURSOR_CHAR
-            else:
-                if i == len(self.nodes)-2:
-                    divider_str = GREEN + '...' + RESET
-                else:
-                    divider_str = ' ' + GREEN + '-' + RESET + ' '
-                if(not self.vertical_layout):
-                    divider =  divider_str
-                else:
-                    divider =  '\n'
-                    self.lines = self.lines + 1
-                txt += BOLD_CYAN + n + RESET
-                if i == len(self.nodes)-2:
-                    self.cached = txt
-                txt += divider
-            if i == 0:
-                self.cached = ''
-        print(txt)
-        footer = self.lines*UP_LINE + UP_LINE
-        print(footer)
 
     def handle_char_input(self, c):
         if c!='\t':
@@ -123,20 +77,20 @@ class GUI:
             self.neighbor = 0
         self.nodes[-1] = self.graph.vs[neighbors[self.neighbor]]['name']
         self.completion = ''
-        self.display()
+        self.refresh()
 
     def auto_complete(self):
         if len(self.completion) > 0:
             self.nodes[-1] = self.nodes[-1] + self.completion
             self.completion = ''
-            self.display()
+            self.refresh()
         else:
             self.append('')
             if(self.pushed is None):
                 self.pushed = self.nodes[-1]
             m = self.matches[self.candidate]
             self.nodes[-1] = self.pushed + m[len(self.pushed):len(m)]
-            self.display()
+            self.refresh()
             self.candidate = (self.candidate + 1) % len(self.matches)
 
     def advance_editor(self):
@@ -186,18 +140,3 @@ class GUI:
                 ns[0:(len(ns)-2)] +
                 [self.graph.vs[selector]['name'] for selector in p] +
                 [''] )
-
-def main():
-    [graph, show_statistics, vertical_layout, description_capable, case_insensitive] = parse_options_and_input(version)
-
-    if show_statistics:
-        do_show_statistics(graph)
-
-    gui = GUI(graph, vertical_layout, description_capable, case_insensitive)
-    with CursorOff():
-        gc = GetChar()
-        while True:
-            gui.handle_char_input(gc.get_char())
-            gui.display()
-
-main()
