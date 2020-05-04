@@ -1,6 +1,9 @@
 
-def GPView():
-init
+from model import GPModel
+
+class GPView():
+    def __init__(self):
+        self.view_state=''
 
     def display_abridged_cached(self):
         print(self.cached)

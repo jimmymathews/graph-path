@@ -4,19 +4,17 @@ from terminal_utilities import *
 from model import GPModel
 from view import GPView
 
-def GPController:
-init
+class GPController:
+    def __init__(self):
+        self.cstate = ''
 
-handle_io
+    def handle_io(self):
         with CursorOff():
             gc = GetChar()
             while True:
                 c = gc.get_char()
-                self.controller.handle_char_input(c)
+                self.handle_char_input(c)
                 self.view.refresh()
-
-
-                self.controller.handle_char_input(c)
 
     def reset_state(self):
         self.nodes = ['']

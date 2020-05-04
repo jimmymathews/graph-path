@@ -27,5 +27,3 @@ def main():
 
     gui = GUI(graph, vertical_layout, description_capable, case_insensitive)
     gui.start()
-
-# main()

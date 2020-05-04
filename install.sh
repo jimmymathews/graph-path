@@ -5,14 +5,21 @@ grn="\u001b[0;32m"
 bold_res="\u001b[0m\u001b[1m"
 res="\u001b[0m"
 
+## Put together executable
+
+echo -e "$grn""Creating executable zip archive file$bold_res"
+cd source
+zip -q -r ../graph_path.tmp.zip *.py
+cd ..
+echo "#!/usr/bin/env python" > graph_path.zip
+cat graph_path.tmp.zip >> graph_path.zip
+rm graph_path.tmp.zip
+mv graph_path.zip gp
+chmod +x gp
+
 
 ## Executable installation
 
-# she="#!"
-# bang=`echo -e "$(which python)\n"`
-echo "#!/usr/bin/env python" > gp
-cat graph-path.py >> gp
-chmod +x gp
 if [[ ! -d ~/bin ]]; then
     mkdir ~/bin
 fi

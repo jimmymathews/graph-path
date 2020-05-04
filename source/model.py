@@ -1,7 +1,7 @@
 
 from pygtrie import *  # third-party library
 
-def GPModel():
+class GPModel():
     def __init__(self, graph, vertical_layout, description_capable, case_insensitive):
         self.reset_state()
         self.graph = graph
