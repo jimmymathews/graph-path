@@ -24,7 +24,7 @@ Then get the files from this repository and run the bash install script:
 ./install.sh
 ```
 
-Use `exec bash` to reload the shell so that `gp` and `man gp` are available right away without starting a new shell. The program itself is written in Python.
+Use `exec bash` to reload the shell so that `gp` and `man gp` are available right away without starting a new shell.
 
 Uninstallation:
 ```
