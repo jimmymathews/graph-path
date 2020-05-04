@@ -9,15 +9,22 @@ Installation <a name="Installation"></a>
 
 Currently supported only in Linux/Mac/Unix environments. Does not require root privileges.
 
-Install the dependencies and run the bash install script:
+First install the [igraph library](https://igraph.org/c/#startc) with Python bindings. Depending on your OS and platform, you'll need to use lines like the following:
+
 ```
-pip install igraph
-pip install pygtrie
-./install.sh
-exec bash
+sudo apt install python-igraph
+pacman -S python-igraph
+brew install igraph
+...
+pip install python-igraph
 ```
 
-The `exec bash` line reloads the shell so that `gp` and `man gp` are available right away without starting a new shell. The program itself is written in Python.
+Then run the bash install script:
+```
+./install.sh
+```
+
+Use `exec bash` to reload the shell so that `gp` and `man gp` are available right away without starting a new shell. The program itself is written in Python.
 
 Uninstallation:
 ```
