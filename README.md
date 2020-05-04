@@ -19,7 +19,7 @@ brew install igraph
 pip install python-igraph
 ```
 
-Then run the bash install script:
+Then get the files from this repository and run the bash install script:
 ```
 ./install.sh
 ```
