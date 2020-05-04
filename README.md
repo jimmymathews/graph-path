@@ -13,7 +13,7 @@ First install the [igraph library](https://igraph.org/c/#startc) with [Python bi
 
 ```
 sudo apt install python-igraph
-pacman -S python-igraph
+sudo pacman -S python-igraph
 brew install igraph
 ...
 pip install python-igraph
