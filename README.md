@@ -9,7 +9,7 @@ Installation <a name="Installation"></a>
 
 Currently supported only in Linux/Mac/Unix environments. Does not require root privileges.
 
-First install the [igraph library](https://igraph.org/c/#startc) with Python bindings. Depending on your OS and platform, you'll need to use lines like the following:
+First install the [igraph library](https://igraph.org/c/#startc) with [Python bindings](https://igraph.org/python/#pyinstall). Depending on your OS and platform, you'll need to use lines like the following:
 
 ```
 sudo apt install python-igraph
