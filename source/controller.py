@@ -6,33 +6,37 @@ from model import GPModel
 from view import GPView
 
 class GPController:
-    def __init__(self, graph, vertical_layout, description_capable, case_insensitive):
-        self.tick=0
-        self.vertical_layout = vertical_layout
+    def __init__(self, graph, using_vertical_layout, description_capable, lettercase_insensitive):
+        self.enter_count=0
+        self.using_vertical_layout = using_vertical_layout
         self.description_capable = description_capable
-        self.case_insensitive = case_insensitive
-        case_manager = lambda x : x
-        if(self.case_insensitive):
-            case_manager = lambda x : x.upper()
-        node_names = sorted([case_manager(graph.vs[i]['name']) for i in range(len(graph.vs))])
+        self.lettercase_insensitive = lettercase_insensitive
+        self.lettercase_handler = lambda x : x
+        if(self.lettercase_insensitive):
+            self.lettercase_handler = lambda x : x.upper()
+        node_names = sorted([self.lettercase_handler(graph.vs[i]['name']) for i in range(len(graph.vs))])
+        if(self.lettercase_insensitive):
+            graph.vs["uppercase name"] = node_names
         self.model = GPModel(graph, node_names)
-        self.view = GPView(self.model, vertical_layout, description_capable)
+        self.view = GPView(self.model, using_vertical_layout, description_capable)
         self.reset_state()
 
+    def reset_state(self):
+        self.model.reset_manipulable_state()
+        self.candidate = 0
+        self.pushed = None
+        self.neighbor = None
+
     def handle_io(self):
+        '''
+        Boilerplate MVC controller handling loop.
+        '''
         with CursorOff():
             gc = GetChar()
             while True:
                 c = gc.get_char()
                 self.handle_char_input(c)
                 self.view.refresh()
-
-    def reset_state(self):
-        self.model.reset_state()
-        self.view.reset_state()
-        self.candidate = 0
-        self.pushed = None
-        self.neighbor = None
 
     def handle_char_input(self, c):
         ns = self.model.nodes
@@ -44,31 +48,28 @@ class GPController:
             self.neighbor = None
 
         if c=='\r' or c=='\n':
-            if(self.tick == 0):
+            if(self.enter_count == 0):
                 self.advance_editor()
-            self.tick = self.tick + 1
-            if(self.tick == 2):
-                self.view.display_abridged_cached()
+            self.enter_count = self.enter_count + 1
+            if(self.enter_count == 2):
+                self.view.push_up_cached_view()
                 self.reset_state()
-            if(self.tick == 3):
-                for i in range(self.view.lines - 1):
-                    print(CLEAR_LINE)
+            if(self.enter_count == 3):
                 exit()
             return
-        self.tick = 0
+        self.enter_count = 0
 
         if c=='\t' and (ns[-1] == '' or self.neighbor is not None):
-            self.complete_with_neighbors()
+            self.show_next_neighbor()
             return
-        elif c=='\t' and self.model.completion is not None:
-            self.auto_complete()
+        elif c=='\t' and self.model.partial_name_completion is not None:
+            self.complete_partial_name()
             return
         
-        if c=='' or c==' ' or (c=='\t' and self.model.completion==''):
+        if c=='' or c==' ' or (c=='\t' and self.model.partial_name_completion==''):
             self.advance_editor()
         elif ord(c) >= 32 and ord(c) <= 126:
-            if self.case_insensitive:
-                c = c.upper()
+            c = self.lettercase_handler(c)
             self.append(c)
         elif ord(c) == 127:
             if(ns[-1] == ''):
@@ -76,7 +77,7 @@ class GPController:
             else:
                 self.lop_off_char()
 
-    def complete_with_neighbors(self):
+    def show_next_neighbor(self):
         ns = self.model.nodes
         if len(ns) <= 1:
             return
@@ -87,14 +88,15 @@ class GPController:
         else:
             self.neighbor = 0
         ns[-1] = g.vs[neighbors[self.neighbor]]['name']
-        self.model.completion = ''
+        self.model.partial_name_completion = ''
         self.view.refresh()
 
-    def auto_complete(self):
+    def complete_partial_name(self):
         ns = self.model.nodes
-        if len(self.model.completion) > 0:
-            ns[-1] = ns[-1] + self.model.completion
-            self.model.completion = ''
+        if len(self.model.partial_name_completion) > 0:
+            ns[-1] = ns[-1] + self.model.partial_name_completion
+            self.model.partial_name_completion = ''
+            # self.model.partial_name_completion = None # Check if this is full completion?
             self.view.refresh()
         else:
             self.append('')
@@ -107,19 +109,19 @@ class GPController:
 
     def advance_editor(self):
         ns = self.model.nodes
-        if self.model.completion == '':
+        if self.model.partial_name_completion == '':
             if len(ns)>1:
                 self.lookup_path()
             else:
                 ns.append('')
-            self.model.completion = None
+            self.model.partial_name_completion = None
 
     def regress_editor(self):
         ns = self.model.nodes
         if(len(ns) > 1 and ns[-1] == ''):
             ns.pop()
             ns[-1] = ''
-        self.model.completion = None        
+        self.model.partial_name_completion = None        
 
     def append(self, c):
         ns = self.model.nodes
@@ -132,11 +134,11 @@ class GPController:
             if len(self.matches) != 0:
                 common = common_prefix(self.matches)
                 if(len(common) >= len(n)):
-                    self.model.completion = common[len(n):len(common)]
+                    self.model.partial_name_completion = common[len(n):len(common)]
                     ns[-1] = n
         except KeyError as ke:
             ns[-1] = ''
-            self.model.completion = ''
+            self.model.partial_name_completion = ''
 
     def lop_off_char(self):
         ns = self.model.nodes

@@ -3,47 +3,58 @@ from ansi_codes import *
 from model import GPModel
 
 class GPView():
-    def __init__(self, model, vertical_layout, description_capable):
+    def __init__(self, model, using_vertical_layout, description_capable):
         self.model = model
-        self.vertical_layout = vertical_layout
+        self.using_vertical_layout = using_vertical_layout
         self.description_capable = description_capable
-        self.reset_state()
+        self.do_cached_clear_command = lambda : print(UP_LINE)
+        self.refresh()
 
-    def reset_state(self):
-        self.lines = 1
-
-    def display_abridged_cached(self):
-        print(self.cached)
-        if(self.vertical_layout):
-            print(CLEAR_LINE)
-            print(UP_LINE)
+    def push_up_cached_view(self):
+        self.do_cached_clear_command()
+        print(self.cached_base_view)
+        if(self.using_vertical_layout):
+            print()
+        self.do_cached_clear_command = lambda : print(UP_LINE)
 
     def refresh(self):
+        self.compute_base_view()
+        self.do_cached_clear_command()
+        print(self.cached_base_view + self.compute_edited_field() + self.compute_go_back_up())
+        self.compute_new_clear_command()
+
+    def compute_base_view(self):
+        self.cached_base_view = ""
+        if self.using_vertical_layout:
+            connection_divider = '\n'
+        else:
+            connection_divider = GREEN + " - " + RESET
         ns = self.model.nodes
-        txt = (CLEAR_LINE + '\n')*self.lines + self.lines*UP_LINE
-        self.lines = 1
-        for i,n in enumerate(ns):
-            if i == len(ns)-1:
-                if(n != '' and self.model.completion != None):
-                    txt += BOLD_MAGENTA + n + RESET
-                    txt += MAGENTA + self.model.completion + RESET
-                txt += CURSOR_CHAR
+        self.cached_base_view = connection_divider.join([BOLD_CYAN+node+RESET for node in ns[0:(len(ns)-1)]])
+
+    def compute_edited_field(self):
+        if len(self.model.nodes) == 1:
+            prompt = ""
+        else:
+            if self.using_vertical_layout:
+                prompt = '\n'
             else:
-                if i == len(ns)-2:
-                    divider_str = GREEN + '...' + RESET
-                else:
-                    divider_str = ' ' + GREEN + '-' + RESET + ' '
-                if(not self.vertical_layout):
-                    divider =  divider_str
-                else:
-                    divider =  '\n'
-                    self.lines = self.lines + 1
-                txt += BOLD_CYAN + n + RESET
-                if i == len(ns)-2:
-                    self.cached = txt
-                txt += divider
-            if i == 0:
-                self.cached = ''
-        print(txt)
-        footer = self.lines*UP_LINE + UP_LINE
-        print(footer)
+                prompt = GREEN + '...' + RESET
+
+        edited_field = prompt
+        last_node = self.model.nodes[-1]
+        if(last_node != '' and self.model.partial_name_completion != None):
+            edited_field += BOLD_MAGENTA + last_node + RESET
+            edited_field += MAGENTA + self.model.partial_name_completion + RESET
+        edited_field += CURSOR_CHAR
+        return edited_field
+
+    def compute_new_clear_command(self):
+        lines = len(self.model.nodes) if self.using_vertical_layout else 1
+        down_clear = (CLEAR_LINE+'\n')*lines
+        go_back_up = self.compute_go_back_up()
+        self.do_cached_clear_command = lambda : print(down_clear + go_back_up + UP_LINE) # stores how to clear view later
+
+    def compute_go_back_up(self):
+        lines = len(self.model.nodes) if self.using_vertical_layout else 1
+        return UP_LINE*lines
