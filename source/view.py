@@ -7,20 +7,21 @@ class GPView():
         self.model = model
         self.using_vertical_layout = using_vertical_layout
         self.description_capable = description_capable
-        self.do_cached_clear_command = lambda : print(UP_LINE)
+        self.print_command = print # In case a future version wants to print somewhere else
+        self.do_cached_clear_command = lambda : self.print_command(UP_LINE)
         self.refresh()
 
-    def push_up_cached_view(self):
+    def post_cached_view_and_reset(self):
         self.do_cached_clear_command()
-        print(self.cached_base_view)
+        self.print_command(self.cached_base_view)
         if(self.using_vertical_layout):
-            print()
-        self.do_cached_clear_command = lambda : print(UP_LINE)
+            self.print_command()
+        self.do_cached_clear_command = lambda : self.print_command(UP_LINE)
 
     def refresh(self):
         self.compute_base_view()
         self.do_cached_clear_command()
-        print(self.cached_base_view + self.compute_edited_field() + self.compute_go_back_up())
+        self.print_command(self.cached_base_view + self.compute_edited_field() + self.compute_go_back_up())
         self.compute_new_clear_command()
 
     def compute_base_view(self):
@@ -43,7 +44,8 @@ class GPView():
 
         edited_field = prompt
         last_node = self.model.nodes[-1]
-        if(last_node != '' and self.model.partial_name_completion != None):
+        # if(last_node != '' and self.model.partial_name_completion != None):
+        if(last_node != ''):
             edited_field += BOLD_MAGENTA + last_node + RESET
             edited_field += MAGENTA + self.model.partial_name_completion + RESET
         edited_field += CURSOR_CHAR
@@ -53,7 +55,7 @@ class GPView():
         lines = len(self.model.nodes) if self.using_vertical_layout else 1
         down_clear = (CLEAR_LINE+'\n')*lines
         go_back_up = self.compute_go_back_up()
-        self.do_cached_clear_command = lambda : print(down_clear + go_back_up + UP_LINE) # stores how to clear view later
+        self.do_cached_clear_command = lambda : self.print_command(down_clear + go_back_up + UP_LINE) # stores how to clear view later
 
     def compute_go_back_up(self):
         lines = len(self.model.nodes) if self.using_vertical_layout else 1
