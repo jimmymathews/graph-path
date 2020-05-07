@@ -44,7 +44,6 @@ class GPView():
 
         edited_field = prompt
         last_node = self.model.nodes[-1]
-        # if(last_node != '' and self.model.partial_name_completion != None):
         if(last_node != ''):
             edited_field += BOLD_MAGENTA + last_node + RESET
             edited_field += MAGENTA + self.model.get_inevitable_name_completion() + RESET
