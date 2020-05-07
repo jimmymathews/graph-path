@@ -136,7 +136,6 @@ class GPController:
         f = self.model.field()
         if(f != ''):
             self.model.set_field(f[0:(len(f)-1)])
-            self.handle_ordinary_char('') #? needed?
 
     def show_next_full_completion(self):
         if self.cached_typed_prefix == None:
@@ -164,4 +163,3 @@ class GPController:
         ic = self.model.get_inevitable_name_completion()
         if len(ic) > 0:
             self.model.set_field(self.model.field() + ic)
-            self.view.refresh()
