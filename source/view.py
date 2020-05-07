@@ -3,10 +3,9 @@ from ansi_codes import *
 from model import GPModel
 
 class GPView():
-    def __init__(self, model, using_vertical_layout, description_capable):
+    def __init__(self, model, using_vertical_layout):
         self.model = model
         self.using_vertical_layout = using_vertical_layout
-        self.description_capable = description_capable
         self.print_command = print # In case a future version wants to print somewhere else
         self.do_cached_clear_command = lambda : self.print_command(UP_LINE)
         self.refresh()
@@ -31,7 +30,19 @@ class GPView():
         else:
             connection_divider = GREEN + " - " + RESET
         ns = self.model.nodes
-        self.cached_base_view = connection_divider.join([BOLD_CYAN+node+RESET for node in ns[0:(len(ns)-1)]])
+        wrap_node = lambda node : BOLD_CYAN + node + RESET
+        if self.description_capable() and len(ns)>1 and self.using_vertical_layout:
+            max_length = max([len(node) for node in ns[0:(len(ns)-1)]])
+            wrap_node = (lambda node :
+                    BOLD_CYAN + node + RESET +
+                    ' '*(1+max_length - len(node)) +
+                    YELLOW +
+                    self.model.graph.vs.select(name=node)['description_string'][0] +
+                    RESET )
+        self.cached_base_view = connection_divider.join([wrap_node(node) for node in ns[0:(len(ns)-1)]])
+
+    def description_capable(self):
+        return 'description_string' in self.model.graph.vs.attributes()
 
     def compute_edited_field(self):
         if len(self.model.nodes) == 1:

@@ -1,22 +1,58 @@
 
+import csv
 from pygtrie import *
 from terminal_utilities import *
 from model import GPModel
 from view import GPView
 
 class GPController:
-    def __init__(self, graph, using_vertical_layout, description_capable, lettercase_insensitive):
+    def __init__(self, graph, using_vertical_layout, description_capable, descriptions_file, lettercase_insensitive):
         self.number_exit_like_requests=0
         self.using_vertical_layout = using_vertical_layout
-        self.description_capable = description_capable
         self.lettercase_insensitive = lettercase_insensitive
         if(self.lettercase_insensitive):
             for i in range(len(graph.vs)):
                 graph.vs[i]['name'] = (graph.vs[i]['name']).upper()
         node_names = sorted([graph.vs[i]['name'] for i in range(len(graph.vs))])
         self.model = GPModel(graph, node_names)
-        self.view = GPView(self.model, using_vertical_layout, description_capable)
+        if(description_capable):
+            self.add_descriptions_to_graph(graph, descriptions_file)
+        self.view = GPView(self.model, using_vertical_layout)
         self.clear_field_entry_handling_state()
+
+    def add_descriptions_to_graph(self, graph, descriptions_file):
+        names = self.model.graph.vs['name']
+
+        df = open(descriptions_file, "r")
+        line1 = df.readlines()[1]
+        if '\t' in line1:
+            delimiter='\t'
+        elif ',' in line1 and sum((1 if c==',' else 0) for c in line1) == 1:
+            delimiter=','
+        elif ' ' in line1 and sum((1 if c==' ' else 0) for c in line1) == 1:
+            delimiter=','
+        else:
+            print(YELLOW+"Warning"+RESET+": Delimiter in descriptions_file could not be determined; neither tab nor comma nor space.")
+            return
+
+        line_count = 0
+        for line in open(descriptions_file, 'r'): line_count += 1
+
+        count = 0
+        with open(descriptions_file, newline='') as csvfile:
+            rows = csv.reader(csvfile, delimiter=delimiter, quotechar='|')
+            print()
+            for row in rows:
+                count = count + 1
+                if count == 1:
+                    continue
+                name = row[0]
+                description = row[1]
+                if name in names:
+                    self.model.graph.vs.select(name=name)['description_string'] = description
+                percent = round(100 * count / line_count)
+                print('\r' + UP_LINE + 'Read ' + str(percent) + "% of " + YELLOW + descriptions_file + RESET + " .")
+            print(UP_LINE + CLEAR_LINE + UP_LINE )
 
     def clear_field_entry_handling_state(self):
         self.cached_typed_prefix = None

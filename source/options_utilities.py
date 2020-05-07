@@ -14,5 +14,6 @@ def parse_options_and_input(version):
     args = parser.parse_args()
     graph_file = args.graph_file[0]
     graph = Graph.Read(graph_file)
-    description_capable = False # not yet implemented
-    return [graph, args.statistics, args.vertical_layout, description_capable, args.case_insensitive]
+    description_capable = False if args.descriptions is None else True
+    descriptions_file = args.descriptions[0] if description_capable else None
+    return [graph, args.statistics, args.vertical_layout, description_capable, descriptions_file, args.case_insensitive]
