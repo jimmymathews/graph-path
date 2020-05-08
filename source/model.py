@@ -4,8 +4,9 @@ from pygtrie import *  # third-party library
 from simple_utilities import *
 
 class GPModel():
-    def __init__(self, graph, node_names):
+    def __init__(self, graph, node_names, descriptions_dict):
         self.graph = graph
+        self.descriptions_dict = descriptions_dict
         self.recreate_index(node_names)
         self.clear_state()
 

@@ -4,6 +4,12 @@ from pygtrie import *
 from terminal_utilities import *
 from model import GPModel
 from view import GPView
+try:
+    import pyperclip
+    clipboard_available = True
+except ImportError as e:
+    clipboard_available = False
+    pass
 
 class GPController:
     def __init__(self, graph, using_vertical_layout, description_capable, descriptions_file, lettercase_insensitive):
@@ -14,14 +20,15 @@ class GPController:
             for i in range(len(graph.vs)):
                 graph.vs[i]['name'] = (graph.vs[i]['name']).upper()
         node_names = sorted([graph.vs[i]['name'] for i in range(len(graph.vs))])
-        self.model = GPModel(graph, node_names)
+        descriptions_dict = None
         if(description_capable):
-            self.add_descriptions_to_graph(graph, descriptions_file)
+            descriptions_dict = self.get_descriptions_dict(graph, descriptions_file)
+        self.model = GPModel(graph, node_names, descriptions_dict)
         self.view = GPView(self.model, using_vertical_layout)
         self.clear_field_entry_handling_state()
 
-    def add_descriptions_to_graph(self, graph, descriptions_file):
-        names = self.model.graph.vs['name']
+    def get_descriptions_dict(self, graph, descriptions_file):
+        names = graph.vs['name']
 
         df = open(descriptions_file, "r")
         line1 = df.readlines()[1]
@@ -42,17 +49,27 @@ class GPController:
         with open(descriptions_file, newline='') as csvfile:
             rows = csv.reader(csvfile, delimiter=delimiter, quotechar='|')
             print()
+            descriptions_dict = {}
             for row in rows:
                 count = count + 1
                 if count == 1:
                     continue
                 name = row[0]
                 description = row[1]
-                if name in names:
-                    self.model.graph.vs.select(name=name)['description_string'] = description
+                # if name in names:
+                descriptions_dict[name] = description
+                    # self.model.graph.vs.select(name=name)['description_string'] = description
                 percent = round(100 * count / line_count)
                 print('\r' + UP_LINE + 'Read ' + str(percent) + "% of " + YELLOW + descriptions_file + RESET + " .")
             print(UP_LINE + CLEAR_LINE + UP_LINE )
+
+        missing = sorted(list(set(names).difference(list(descriptions_dict.keys()))))
+        if len(missing) > 0:
+            missing_string = '\n'.join(missing[0:(min(len(missing), 15))])
+            if(len(missing) > 15):
+                missing_string = missing_string + "\n...\n"
+            print(YELLOW + "Warning" + RESET + ": descriptions_file is missing the "+ str(len(missing)) +" node names:\n" + missing_string)
+        return descriptions_dict
 
     def clear_field_entry_handling_state(self):
         self.cached_typed_prefix = None
@@ -115,6 +132,8 @@ class GPController:
             return
         if(self.number_exit_like_requests == 1):
             self.view.post_cached_view_and_reset()
+            if clipboard_available:
+                pyperclip.copy('\n'.join(self.model.nodes))
             self.model.clear_state()
             self.number_exit_like_requests = 2
             return

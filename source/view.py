@@ -8,7 +8,6 @@ class GPView():
         self.using_vertical_layout = using_vertical_layout
         self.print_command = print # In case a future version wants to print somewhere else
         self.do_cached_clear_command = lambda : self.print_command(UP_LINE)
-        self.refresh()
 
     def post_cached_view_and_reset(self):
         self.do_cached_clear_command()
@@ -37,12 +36,12 @@ class GPView():
                     BOLD_CYAN + node + RESET +
                     ' '*(1+max_length - len(node)) +
                     YELLOW +
-                    self.model.graph.vs.select(name=node)['description_string'][0] +
+                    (self.model.descriptions_dict[node] if node in self.model.descriptions_dict.keys() else "<missing>") +
                     RESET )
         self.cached_base_view = connection_divider.join([wrap_node(node) for node in ns[0:(len(ns)-1)]])
 
     def description_capable(self):
-        return 'description_string' in self.model.graph.vs.attributes()
+        return self.model.descriptions_dict != None
 
     def compute_edited_field(self):
         if len(self.model.nodes) == 1:

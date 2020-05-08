@@ -31,6 +31,11 @@ Uninstallation:
 ./uninstall.sh
 ```
 
+To enable the clipboard functionality (which copies node name list to clipboard on enter-enter), do:
+```
+pip install pyperclip
+```
+
 Usage <a name="Usage"></a>
 -----
   - *`regular character`*. Node name query.
