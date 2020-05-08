@@ -1,6 +1,7 @@
 
 import csv
 from pygtrie import *
+from igraph import plot, layout
 from terminal_utilities import *
 from model import GPModel
 from view import GPView
@@ -12,7 +13,7 @@ except ImportError as e:
     pass
 
 class GPController:
-    def __init__(self, graph, using_vertical_layout, description_capable, descriptions_file, lettercase_insensitive):
+    def __init__(self, graph, using_vertical_layout, description_capable, descriptions_file, lettercase_insensitive, showing_plot):
         self.number_exit_like_requests=0
         self.using_vertical_layout = using_vertical_layout
         self.lettercase_insensitive = lettercase_insensitive
@@ -25,6 +26,7 @@ class GPController:
             descriptions_dict = self.get_descriptions_dict(graph, descriptions_file)
         self.model = GPModel(graph, node_names, descriptions_dict)
         self.view = GPView(self.model, using_vertical_layout)
+        self.showing_plot = showing_plot
         self.clear_field_entry_handling_state()
 
     def get_descriptions_dict(self, graph, descriptions_file):
@@ -134,6 +136,12 @@ class GPController:
             self.view.post_cached_view_and_reset()
             if clipboard_available:
                 pyperclip.copy('\n'.join(self.model.nodes))
+            if self.showing_plot:
+                selection_operator = lambda vertex: vertex['name'] in self.model.nodes
+                vertices = self.model.graph.vs.select(selection_operator)
+                graph2 = self.model.graph.subgraph(vertices)
+                graph2.vs['label'] = graph2.vs['name']
+                plot(graph2, layout=graph2.layout("kk"), vertex_size=15, vertex_label_size=18, vertex_color="#6495ED", vertex_label_dist=1.5)
             self.model.clear_state()
             self.number_exit_like_requests = 2
             return
