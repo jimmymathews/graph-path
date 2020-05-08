@@ -13,7 +13,7 @@ except ImportError as e:
     pass
 
 class GPController:
-    def __init__(self, graph, using_vertical_layout, description_capable, descriptions_file, lettercase_insensitive, showing_plot, being_quiet):
+    def __init__(self, graph, using_vertical_layout, description_capable, descriptions_file, lettercase_insensitive, showing_plot, being_quiet, neighborhood_size):
         self.being_quiet = being_quiet
         self.number_exit_like_requests=0
         self.using_vertical_layout = using_vertical_layout
@@ -25,6 +25,7 @@ class GPController:
         descriptions_dict = None
         if(description_capable):
             descriptions_dict = self.get_descriptions_dict(graph, descriptions_file)
+        self.neighborhood_size = neighborhood_size
         self.model = GPModel(graph, node_names, descriptions_dict, being_quiet)
         self.view = GPView(self.model, using_vertical_layout)
         self.showing_plot = showing_plot
@@ -138,12 +139,17 @@ class GPController:
             self.view.post_cached_view_and_reset()
             if clipboard_available:
                 pyperclip.copy('\n'.join(self.model.nodes))
-            if self.showing_plot:
+            if self.showing_plot and self.model.nodes != ['']:
                 selection_operator = lambda vertex: vertex['name'] in self.model.nodes
                 vertices = self.model.graph.vs.select(selection_operator)
-                graph2 = self.model.graph.subgraph(vertices)
+
+                if self.neighborhood_size == 0:
+                    graph2 = self.model.graph.subgraph(vertices)
+                if self.neighborhood_size == 1:
+                    graph2 = self.model.graph.subgraph(sum(self.model.graph.neighborhood(vertices=vertices), []))
+
                 graph2.vs['label'] = graph2.vs['name']
-                plot(graph2, layout=graph2.layout("kk"), vertex_size=15, vertex_label_size=18, vertex_color="#6495ED", vertex_label_dist=1.5)
+                plot(graph2, layout=graph2.layout("kk"), margin=[60,60,60,60], vertex_size=15, vertex_label_size=18, vertex_color="#6495ED", vertex_label_dist=1.5)
             self.model.clear_state()
             self.number_exit_like_requests = 2
             return
