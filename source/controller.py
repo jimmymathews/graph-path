@@ -13,7 +13,8 @@ except ImportError as e:
     pass
 
 class GPController:
-    def __init__(self, graph, using_vertical_layout, description_capable, descriptions_file, lettercase_insensitive, showing_plot):
+    def __init__(self, graph, using_vertical_layout, description_capable, descriptions_file, lettercase_insensitive, showing_plot, being_quiet):
+        self.being_quiet = being_quiet
         self.number_exit_like_requests=0
         self.using_vertical_layout = using_vertical_layout
         self.lettercase_insensitive = lettercase_insensitive
@@ -24,7 +25,7 @@ class GPController:
         descriptions_dict = None
         if(description_capable):
             descriptions_dict = self.get_descriptions_dict(graph, descriptions_file)
-        self.model = GPModel(graph, node_names, descriptions_dict)
+        self.model = GPModel(graph, node_names, descriptions_dict, being_quiet)
         self.view = GPView(self.model, using_vertical_layout)
         self.showing_plot = showing_plot
         self.clear_field_entry_handling_state()
@@ -41,7 +42,7 @@ class GPController:
         elif ' ' in line1 and sum((1 if c==' ' else 0) for c in line1) == 1:
             delimiter=','
         else:
-            print(YELLOW+"Warning"+RESET+": Delimiter in descriptions_file could not be determined; neither tab nor comma nor space.")
+            self.print_warning("Delimiter in descriptions_file could not be determined; neither tab nor comma nor space.")
             return
 
         line_count = 0
@@ -67,10 +68,11 @@ class GPController:
 
         missing = sorted(list(set(names).difference(list(descriptions_dict.keys()))))
         if len(missing) > 0:
-            missing_string = '\n'.join(missing[0:(min(len(missing), 15))])
+            # missing_string = '\n'.join(missing[0:(min(len(missing), 15))])
+            missing_string = '\n'.join(missing)
             if(len(missing) > 15):
                 missing_string = missing_string + "\n...\n"
-            print(YELLOW + "Warning" + RESET + ": descriptions_file is missing the "+ str(len(missing)) +" node names:\n" + missing_string)
+            self.print_warning("descriptions_file is missing the "+ str(len(missing)) +" node names:\n" + missing_string)
         return descriptions_dict
 
     def clear_field_entry_handling_state(self):
@@ -98,7 +100,7 @@ class GPController:
 
     def check_continuation_conditions(self, c):
         if c == '':
-            print(YELLOW+"Warning"+RESET+": Received empty char input. Aborting.")
+            self.print_warning("Received empty char input. Aborting.")
             exit()
         if c != '\t':
             self.clear_field_entry_handling_state()
@@ -123,7 +125,7 @@ class GPController:
             return  
 
         print()
-        print(YELLOW+"Warning"+RESET+": Unhandled char input. Aborting.")
+        self.print_warning("Unhandled char input. Aborting.")
         exit()
 
     def handle_enter_request(self):
@@ -226,3 +228,7 @@ class GPController:
         ic = self.model.get_inevitable_name_completion()
         if len(ic) > 0:
             self.model.set_field(self.model.field() + ic)
+
+    def print_warning(self, message):
+        if not self.being_quiet:
+            print(YELLOW + "Warning" + RESET + ": " + message)

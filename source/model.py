@@ -4,9 +4,10 @@ from pygtrie import *  # third-party library
 from simple_utilities import *
 
 class GPModel():
-    def __init__(self, graph, node_names, descriptions_dict):
+    def __init__(self, graph, node_names, descriptions_dict, being_quiet):
         self.graph = graph
         self.descriptions_dict = descriptions_dict
+        self.being_quiet = being_quiet
         self.recreate_index(node_names)
         self.clear_state()
 
@@ -30,7 +31,7 @@ class GPModel():
     def set_field(self, n):
         self.nodes[-1] = n
         if not self.check_node_query_validity(n):
-            print(YELLOW+"Warning"+RESET+": Invalid node name query string was allowed in to model.")
+            self.print_warning("Invalid node name query string was allowed in to model.")
             exit()
 
     def check_node_query_validity(self, node):
@@ -65,3 +66,7 @@ class GPModel():
         except KeyError as ke:
             inevitable_name_completion = None
         return inevitable_name_completion
+
+    def print_warning(self, message):
+        if not self.being_quiet:
+            print(YELLOW + "Warning" + RESET + ": " + message)
